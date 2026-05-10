@@ -25,18 +25,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
+  // Re-lit localStorage à chaque changement de page (important: le layout persiste
+  // entre navigations, donc on ne peut pas dépendre d'un useEffect monté une seule fois)
   useEffect(() => {
     const saved = localStorage.getItem(ADMIN_TOKEN_KEY);
-    if (saved) setToken(saved);
+    setToken(saved ?? null);
     setMounted(true);
-  }, []);
+  }, [pathname]);
+
+  // Redirige vers login si pas de token (sauf sur la page login elle-même)
+  useEffect(() => {
+    if (!mounted) return;
+    if (!token && pathname !== '/admin/login') {
+      router.replace('/admin/login');
+    }
+  }, [mounted, token, pathname, router]);
 
   useEffect(() => {
     if (!token) return;
     adminFetch('/api/admin/engine/review-queue')
       .then((r) => r.json())
       .then((d) => {
-        // review-queue retourne { queue: [...], count: N }
         if (d?.count != null) {
           setReviewCount(d.count);
         } else {
@@ -72,12 +81,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }
 
-  if (!mounted) {
+  const isLoginPage = pathname === '/admin/login';
+
+  if (!mounted || (!token && !isLoginPage)) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
       </div>
     );
+  }
+
+  if (isLoginPage) {
+    return <>{children}</>;
   }
 
   return (

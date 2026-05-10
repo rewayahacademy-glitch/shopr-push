@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const ADMIN_TOKEN = 'shopr_admin_OWVkMWFkNDgtMmQzYy00MjNk';
-
 export function getAdminToken(): string {
-  if (typeof window === 'undefined') return ADMIN_TOKEN;
+  if (typeof window === 'undefined') return '';
   return localStorage.getItem('admin_token') ?? '';
 }
 
