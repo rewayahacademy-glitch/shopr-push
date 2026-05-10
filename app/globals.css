@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Custom Properties ─────────────────────────────────── */
+:root {
+  --color-teal:       #025259;
+  --color-teal-deep:  #034F5A;
+  --color-teal-mid:   #11525B;
+  --color-teal-light: rgba(2, 82, 89, 0.08);
+  --color-slate:      #3E4F4C;
+  --color-salmon:     #ff947a;
+  --color-salmon-hov: #e8836b;
+  --color-salmon-lt:  rgba(255, 148, 122, 0.12);
+  --color-bg:         #F7F5F2;
+  --color-surface:    #FFFFFF;
+  --color-bg-alt:     #F0EDE9;
+  --color-border:     rgba(2, 82, 89, 0.1);
+}
+
+/* ─── @layer base ────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    font-family: 'Outfit', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-teal-deep);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  ::selection {
+    background: var(--color-salmon-lt);
+    color: var(--color-teal-deep);
+  }
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────── */
+
+/* Geometric shape floats */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+  33%       { transform: translateY(-22px) rotate(5deg) scale(1.02); }
+  66%       { transform: translateY(-10px) rotate(-4deg) scale(0.98); }
+}
+@keyframes float-med {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-16px) rotate(-7deg); }
+}
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-10px) scale(1.03); }
+}
+
+/* Orbital rings */
+@keyframes orbit-cw  { from { transform: rotate(0deg);    } to { transform: rotate(360deg);  } }
+@keyframes orbit-ccw { from { transform: rotate(0deg);    } to { transform: rotate(-360deg); } }
+
+/* Particle drift */
+@keyframes drift {
+  0%   { transform: translate(0, 0);            opacity: 0.55; }
+  25%  { transform: translate(14px, -22px);     opacity: 0.85; }
+  50%  { transform: translate(26px, -6px);      opacity: 0.55; }
+  75%  { transform: translate(6px, -30px);      opacity: 0.75; }
+  100% { transform: translate(0, 0);            opacity: 0.55; }
+}
+
+/* Horizontal wave */
+@keyframes wave-drift {
+  0%, 100% { transform: translateX(0)   scaleY(1); }
+  50%       { transform: translateX(-24px) scaleY(1.04); }
+}
+
+/* Fade-up entrance */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Floating product cards */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Pulse */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ─── @layer components ──────────────────────────────────────── */
+@layer components {
+
+  /* — Focus ring — */
+  .focus-ring { outline: none; }
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 2px;
+  }
+
+  /* — Card hover — */
+  .card-hover {
+    transition: transform 0.32s cubic-bezier(0.22,1,0.36,1), box-shadow 0.32s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(2,82,89,0.13), 0 6px 12px rgba(2,82,89,0.07);
+  }
+
+  /* — Section backgrounds — */
+  .gradient-page {
+    background: linear-gradient(160deg, #F7F5F2 0%, #EEF5F5 45%, #F7F5F2 100%);
+  }
+  .gradient-section-light {
+    background: linear-gradient(160deg, #F2F8F8 0%, #F7F5F2 55%, #F0EDE9 100%);
+  }
+  .gradient-section-dark {
+    background: linear-gradient(150deg, var(--color-teal-deep) 0%, var(--color-teal) 55%, var(--color-teal-mid) 100%);
+  }
+  .gradient-teal {
+    background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-teal-deep) 100%);
+  }
+  .gradient-salmon {
+    background: linear-gradient(135deg, var(--color-salmon) 0%, var(--color-salmon-hov) 100%);
+  }
+
+  /* — Eyebrow label — */
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-salmon);
+    margin-bottom: 0.5rem;
+  }
+
+  /* — Link underline — */
+  .link-underline { position: relative; }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0;
+    width: 0; height: 2px;
+    background: var(--color-salmon);
+    transition: width 0.3s cubic-bezier(0.22,1,0.36,1);
+    border-radius: 1px;
+  }
+  .link-underline:hover::after { width: 100%; }
+
+  /* — Skeleton — */
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-bg-alt) 25%, rgba(2,82,89,0.08) 50%, var(--color-bg-alt) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+    border-radius: 0.375rem;
+  }
+}
+
+/* ─── @layer utilities ───────────────────────────────────────── */
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  .animate-float-slow  { animation: float-slow 10s ease-in-out infinite; }
+  .animate-float-med   { animation: float-med   7s ease-in-out infinite; }
+  .animate-float-fast  { animation: float-fast  4.5s ease-in-out infinite; }
+  .animate-orbit-cw    { animation: orbit-cw   30s linear infinite; }
+  .animate-orbit-ccw   { animation: orbit-ccw  22s linear infinite; }
+  .animate-drift       { animation: drift      13s ease-in-out infinite; }
+  .animate-wave-drift  { animation: wave-drift  9s ease-in-out infinite; }
+  .animate-fade-up     { animation: fade-up    0.6s ease-out forwards; }
+  .animate-pulse-slow  { animation: pulse-slow  3s ease-in-out infinite; }
+  .animate-float       { animation: float       4s ease-in-out infinite; }
+}

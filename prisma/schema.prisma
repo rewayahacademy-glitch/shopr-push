@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  name         String
+  description  String
+  icon         String
+  isActive     Boolean   @default(true)
+  products     Product[]
+  logs         AdminLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Product {
+  id                 String           @id @default(cuid())
+  slug               String           @unique
+  name               String
+  description        String
+  shortDescription   String
+  categoryId         String
+  category           Category         @relation(fields: [categoryId], references: [id])
+  imageUrl           String
+  images             String[]
+  price              Float
+  originalPrice      Float?
+  currency           String           @default("EUR")
+  affiliateUrl       String
+  sourceName         String
+  sourceDomain       String
+  sourceLogoUrl      String?
+  badges             Json             @default("[]")
+  qualityScore       Float
+  valueScore         Float
+  trendingScore      Float?
+  affiliateScore     Float?
+  complianceScore    Float?
+  qualityPriceScore  Float?
+  merchantTrustScore Float?
+  trendScore         Float?
+  seasonalScore      Float?
+  totalScore         Float?
+  halalStatus        String           @default("allowed")
+  rejectionReasons   String[]
+  tags               String[]
+  isAvailable        Boolean          @default(true)
+  featured           Boolean          @default(false)
+  lastUpdated        DateTime         @default(now())
+  clicks             AffiliateClick[]
+  logs               AdminLog[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([isAvailable, halalStatus])
+  @@index([isAvailable, halalStatus, trendingScore(sort: Desc)])
+  @@index([isAvailable, halalStatus, valueScore(sort: Desc)])
+  @@index([isAvailable, halalStatus, price])
+  @@index([featured, isAvailable, halalStatus])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AffiliateClick {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  userAgent String?
+  referer   String?
+  geo       String?
+  createdAt DateTime @default(now())
+
+  @@index([productId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AdminLog {
+  id         String   @id @default(cuid())
+  action     String
+  entity     String
+  entityId   String?
+  productId  String?
+  categoryId String?
+  product    Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  payload    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt(sort: Desc)])
+  @@index([action])
+}
