@@ -25,6 +25,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const body = await req.json().catch(() => null);
   const parsed = CategoryUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 400 });
+  const existing = await prisma.category.findUnique({ where: { id: params.id }, select: { id: true } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const cat = await prisma.category.update({ where: { id: params.id }, data: parsed.data });
   auditLog({ action: "UPDATE_CATEGORY", entity: "category", entityId: params.id, categoryId: params.id, payload: parsed.data as Record<string, unknown>, ipAddress: getClientIp(req) });
   return NextResponse.json(cat);

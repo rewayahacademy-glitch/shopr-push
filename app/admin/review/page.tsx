@@ -43,6 +43,7 @@ export default function ReviewPage() {
   const [history, setHistory] = useState<unknown[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
 
   async function loadQueue() {
     setLoading(true);
@@ -77,7 +78,7 @@ export default function ReviewPage() {
         setHistory(arr);
       }
     } catch {
-      // ignore
+      console.error('Erreur chargement historique');
     } finally {
       setHistoryLoading(false);
     }
@@ -101,8 +102,8 @@ export default function ReviewPage() {
   async function submitDecision(productId: string, decision: 'approved' | 'rejected') {
     const comment = decisions[productId]?.comment ?? '';
     setDecision(productId, 'submitting', true);
+    setDecisionError(null);
 
-    // L'API attend: { productId, correctedStatus, correctedBy, notes? }
     const correctedStatus = decision === 'approved' ? 'allowed' : 'forbidden';
 
     try {
@@ -118,18 +119,17 @@ export default function ReviewPage() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        alert(err?.error ?? err?.message ?? 'Erreur lors de la soumission');
+        setDecisionError(err?.error ?? err?.message ?? 'Erreur lors de la soumission');
         setDecision(productId, 'submitting', false);
         return;
       }
 
       setDecision(productId, 'done', decision);
-      // Retirer de la liste après 1.5s
       setTimeout(() => {
         setProducts((prev) => prev.filter((p) => p.id !== productId));
       }, 1500);
     } catch {
-      alert('Erreur réseau');
+      setDecisionError('Erreur réseau');
       setDecision(productId, 'submitting', false);
     }
   }
@@ -200,6 +200,11 @@ export default function ReviewPage() {
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
           {error}
+        </div>
+      )}
+      {decisionError && (
+        <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          {decisionError}
         </div>
       )}
 
@@ -369,7 +374,7 @@ export default function ReviewPage() {
           ) : (
             <div className="divide-y divide-gray-50">
               {(history as Array<Record<string, unknown>>).map((item, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-3">
+                <div key={(item as Record<string, unknown>).id as string ?? i} className="flex items-center justify-between px-5 py-3">
                   <div>
                     <p className="text-sm font-medium text-gray-800">
                       {String(item.productName ?? item.productId ?? '—')}

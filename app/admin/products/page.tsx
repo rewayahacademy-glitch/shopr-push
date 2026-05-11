@@ -83,24 +83,28 @@ export default function ProductsPage() {
         await loadProducts();
         setDeleteConfirm(null);
       } else {
-        alert('Erreur lors de la suppression');
+        setError('Erreur lors de la suppression');
+        setDeleting(false);
       }
     } catch {
-      alert('Erreur réseau');
-    } finally {
+      setError('Erreur réseau lors de la suppression');
       setDeleting(false);
     }
   }
 
   async function handleHalalToggle(id: string, newStatus: string) {
     try {
-      await adminFetch(`/api/admin/products/${id}/halal`, {
+      const res = await adminFetch(`/api/admin/products/${id}/halal`, {
         method: 'POST',
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ halalStatus: newStatus }),
       });
-      await loadProducts();
+      if (res.ok) {
+        await loadProducts();
+      } else {
+        setError('Erreur lors du changement de statut');
+      }
     } catch {
-      alert('Erreur lors du changement de statut');
+      setError('Erreur réseau lors du changement de statut');
     }
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { adminFetch } from '@/components/admin/useAdminFetch';
 
 interface LogEntry {
@@ -132,8 +132,8 @@ export default function LogsPage() {
                   </tr>
                 ) : (
                   paginated.map((log) => (
-                    <>
-                      <tr key={log.id} className="hover:bg-gray-50 transition-colors">
+                    <Fragment key={log.id}>
+                      <tr className="hover:bg-gray-50 transition-colors">
                         {/* Action */}
                         <td className="px-4 py-3">
                           <span
@@ -177,7 +177,7 @@ export default function LogsPage() {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   ))
                 )}
               </tbody>

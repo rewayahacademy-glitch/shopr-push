@@ -55,33 +55,36 @@ export default function AdminDashboard() {
       setError(null);
       try {
         const [analyticsRes, logsRes, reviewRes] = await Promise.all([
-          adminFetch('/api/admin/analytics'),
-          adminFetch('/api/admin/logs'),
-          adminFetch('/api/admin/engine/review-queue'),
+          adminFetch('/api/admin/analytics').catch(() => null),
+          adminFetch('/api/admin/logs').catch(() => null),
+          adminFetch('/api/admin/engine/review-queue').catch(() => null),
         ]);
 
-        if (analyticsRes.status === 401) {
+        if (analyticsRes?.status === 401) {
           setError('Non autorisé. Vérifiez votre token admin.');
           return;
         }
 
-        const analyticsData = analyticsRes.ok ? await analyticsRes.json() : {};
-        const logsData = logsRes.ok ? await logsRes.json() : [];
-        const reviewData = reviewRes.ok ? await reviewRes.json() : [];
+        if (analyticsRes?.ok) {
+          const analyticsData = await analyticsRes.json();
+          setAnalytics(analyticsData);
+        }
 
-        setAnalytics(analyticsData);
+        if (logsRes?.ok) {
+          const logsData = await logsRes.json();
+          const logsArray = Array.isArray(logsData)
+            ? logsData
+            : logsData?.data ?? logsData?.logs ?? logsData?.items ?? [];
+          setLogs(logsArray.slice(0, 5));
+        }
 
-        // API paginate retourne { data: [...], ... }
-        const logsArray = Array.isArray(logsData)
-          ? logsData
-          : logsData?.data ?? logsData?.logs ?? logsData?.items ?? [];
-        setLogs(logsArray.slice(0, 5));
-
-        // review-queue retourne { queue: [...], count: N }
-        const reviewArray = Array.isArray(reviewData)
-          ? reviewData
-          : reviewData?.queue ?? reviewData?.products ?? reviewData?.items ?? [];
-        setReviewCount(reviewData?.count ?? reviewArray.length);
+        if (reviewRes?.ok) {
+          const reviewData = await reviewRes.json();
+          const reviewArray = Array.isArray(reviewData)
+            ? reviewData
+            : reviewData?.queue ?? reviewData?.products ?? reviewData?.items ?? [];
+          setReviewCount(reviewData?.count ?? reviewArray.length);
+        }
       } catch {
         setError('Erreur réseau lors du chargement des données');
       } finally {

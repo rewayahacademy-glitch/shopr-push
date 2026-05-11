@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { adminFetch } from '@/components/admin/useAdminFetch';
+import { slugify } from '@/lib/utils';
 
 interface Category {
   id: string;
@@ -33,15 +34,6 @@ interface ProductFormProps {
   initialData?: Partial<ProductFormData & { qualityScore?: string | number; valueScore?: string | number; tags?: string | string[] }>;
   productId?: string;
   mode: 'create' | 'edit';
-}
-
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 const HALAL_STATUS_OPTIONS = [
@@ -90,7 +82,7 @@ export default function ProductForm({ initialData, productId, mode }: ProductFor
         const arr = Array.isArray(data) ? data : data?.categories ?? data?.items ?? [];
         setCategories(arr);
       })
-      .catch(() => {});
+      .catch(() => setError('Impossible de charger les catégories'));
   }, []);
 
   function handleNameChange(value: string) {
@@ -110,7 +102,11 @@ export default function ProductForm({ initialData, productId, mode }: ProductFor
     if (!form.price || isNaN(Number(form.price)) || Number(form.price) <= 0) {
       e.price = 'Un prix valide est requis';
     }
-    if (!form.affiliateUrl.trim()) e.affiliateUrl = "L'URL affiliée est requise";
+    if (!form.affiliateUrl.trim()) {
+      e.affiliateUrl = "L'URL affiliée est requise";
+    } else if (!/^https?:\/\/.+/.test(form.affiliateUrl.trim())) {
+      e.affiliateUrl = "L'URL doit commencer par http:// ou https://";
+    }
     if (!form.categoryId) e.categoryId = 'La catégorie est requise';
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -136,9 +132,9 @@ export default function ProductForm({ initialData, productId, mode }: ProductFor
       slug: form.slug,
       name: form.name,
       description: form.description,
-      shortDescription: shortDesc.length >= 5 ? shortDesc : shortDesc + '     ',
+      shortDescription: shortDesc.length >= 5 ? shortDesc : shortDesc + ' —',
       categoryId: form.categoryId,
-      imageUrl: form.imageUrl || 'https://via.placeholder.com/400x400?text=No+Image',
+      imageUrl: form.imageUrl || 'https://placehold.co/400x400?text=No+Image',
       price: Number(form.price),
       currency: form.currency,
       affiliateUrl: form.affiliateUrl,

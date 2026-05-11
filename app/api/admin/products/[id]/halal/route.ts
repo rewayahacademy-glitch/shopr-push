@@ -27,7 +27,6 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       halalStatus,
       rejectionReasons,
       ...(complianceScore !== undefined ? { complianceScore } : {}),
-      isAvailable: halalStatus === "allowed",
       lastUpdated: new Date(),
     },
   });

@@ -217,7 +217,7 @@ export default function AnalyticsPage() {
             </div>
             <div className="divide-y divide-gray-50">
               {clicksByDay.slice(0, 10).map((day, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-3">
+                <div key={day.date ?? day.day ?? i} className="flex items-center justify-between px-5 py-3">
                   <span className="text-sm text-gray-600">{getDayLabel(day)}</span>
                   <span className="text-sm font-semibold text-indigo-600">{getDayCount(day)} clics</span>
                 </div>

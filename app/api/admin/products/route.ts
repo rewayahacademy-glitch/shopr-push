@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
   if (deny) return deny;
 
   const sp = Object.fromEntries(new URL(req.url).searchParams);
-  const { cursor, limit } = PaginationSchema.parse(sp);
+  const parsedPagination = PaginationSchema.safeParse(sp);
+  const { cursor, limit } = parsedPagination.success ? parsedPagination.data : { cursor: undefined, limit: 50 };
   const { category, halal, available, search } = sp;
 
   const items = await prisma.product.findMany({

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { adminFetch } from '@/components/admin/useAdminFetch';
+import { slugify } from '@/lib/utils';
 
 interface Category {
   id: string;
@@ -12,15 +13,6 @@ interface Category {
   isActive: boolean;
   _count?: { products: number };
   productCount?: number;
-}
-
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 export default function CategoriesPage() {

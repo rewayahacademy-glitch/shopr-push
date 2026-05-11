@@ -12,6 +12,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin, getClientIp } from '@/lib/api/auth';
 import { submitFeedback, getFeedbackHistory } from '@/lib/engine/modules/feedbackLearningLoop';
+import { prisma } from '@/lib/db';
 import { z } from 'zod';
 
 const FeedbackSchema = z.object({
@@ -33,9 +34,7 @@ export async function POST(req: NextRequest) {
 
   const { productId, correctedStatus, correctedBy, notes } = parsed.data;
 
-  const product = await import('@/lib/db').then(({ prisma }) =>
-    prisma.product.findUnique({ where: { id: productId }, select: { id: true, halalStatus: true } })
-  );
+  const product = await prisma.product.findUnique({ where: { id: productId }, select: { id: true, halalStatus: true } });
 
   if (!product) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });

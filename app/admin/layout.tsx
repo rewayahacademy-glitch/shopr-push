@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { adminFetch } from '@/components/admin/useAdminFetch';
-
-const ADMIN_TOKEN_KEY = 'admin_token';
 
 const navLinks = [
   { href: '/admin', label: 'Dashboard', icon: '▦' },
@@ -17,7 +14,6 @@ const navLinks = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [reviewCount, setReviewCount] = useState(0);
   const [rescoring, setRescoring] = useState(false);
@@ -25,25 +21,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
-  // Re-lit localStorage à chaque changement de page (important: le layout persiste
-  // entre navigations, donc on ne peut pas dépendre d'un useEffect monté une seule fois)
   useEffect(() => {
-    const saved = localStorage.getItem(ADMIN_TOKEN_KEY);
-    setToken(saved ?? null);
     setMounted(true);
-  }, [pathname]);
-
-  // Redirige vers login si pas de token (sauf sur la page login elle-même)
-  useEffect(() => {
-    if (!mounted) return;
-    if (!token && pathname !== '/admin/login') {
-      router.replace('/admin/login');
-    }
-  }, [mounted, token, pathname, router]);
+  }, []);
 
   useEffect(() => {
-    if (!token) return;
-    adminFetch('/api/admin/engine/review-queue')
+    fetch('/api/admin/engine/review-queue')
       .then((r) => r.json())
       .then((d) => {
         if (d?.count != null) {
@@ -54,12 +37,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
       })
       .catch(() => {});
-  }, [token]);
+  }, []);
 
   async function handleLogout() {
     await fetch('/api/admin/session', { method: 'DELETE' });
-    localStorage.removeItem(ADMIN_TOKEN_KEY);
-    setToken(null);
     router.push('/admin/login');
   }
 
@@ -67,7 +48,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setRescoring(true);
     setRescoredMsg('');
     try {
-      const res = await adminFetch('/api/engine/score', { method: 'POST' });
+      const res = await fetch('/api/engine/score', { method: 'POST' });
       if (res.ok) {
         setRescoredMsg('Rescoring terminé !');
       } else {
@@ -83,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const isLoginPage = pathname === '/admin/login';
 
-  if (!mounted || (!token && !isLoginPage)) {
+  if (!mounted) {
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-50">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
@@ -162,7 +143,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-3">
             {rescoredMsg && (
-              <span className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 border border-green-200">
+              <span className={`rounded-lg px-3 py-1.5 text-xs font-medium border ${
+                rescoredMsg === 'Rescoring terminé !'
+                  ? 'bg-green-50 text-green-700 border-green-200'
+                  : 'bg-red-50 text-red-700 border-red-200'
+              }`}>
                 {rescoredMsg}
               </span>
             )}

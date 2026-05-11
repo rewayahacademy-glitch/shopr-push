@@ -22,8 +22,7 @@ export default function AdminLoginPage() {
       });
 
       if (res.ok) {
-        // Stocker aussi dans localStorage pour les appels API client-side
-        localStorage.setItem('admin_token', token);
+        // Le cookie HttpOnly est déjà défini par le serveur — pas besoin de localStorage
         router.push('/admin');
         router.refresh();
       } else {
